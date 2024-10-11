@@ -1,5 +1,12 @@
 # runy - tiny run manager
 
+[![tag](https://img.shields.io/github/tag/belo4ya/runy.svg)](https://github.com/belo4ya/runy/releases)
+![Go Version](https://img.shields.io/github/go-mod/go-version/belo4ya/runy?logo=go)
+[![GoDoc](https://godoc.org/github.com/belo4ya/runy?status.svg)](https://pkg.go.dev/github.com/belo4ya/runy)
+[![Go report](https://goreportcard.com/badge/github.com/belo4ya/runy)](https://goreportcard.com/report/github.com/belo4ya/runy)
+[![Coverage](https://img.shields.io/codecov/c/github/belo4ya/runy)](https://codecov.io/gh/belo4ya/runy)
+[![License](https://img.shields.io/github/license/belo4ya/runy)](./LICENSE)
+
 ## 🚀 Install
 
 ```sh

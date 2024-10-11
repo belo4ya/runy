@@ -17,7 +17,7 @@ test:
 .PHONY: test-cov
 test-cov:
 	mkdir -p coverage \
-	&& go test -race -v ./... -coverprofile=coverage/cover.out \
+	&& go test -race ./... -coverprofile=coverage/cover.out \
 	&& go tool cover -html=coverage/cover.out -o coverage/cover.html
 
 .PHONY: all
