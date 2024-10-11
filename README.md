@@ -37,7 +37,7 @@ func main() {
 }
 
 func run() error {
-	ctx := runy.SetupSignalHandler(context.Background()) // setup handler for SIGTERM and SIGINT
+	ctx := runy.SetupSignalHandler(context.Background()) // handle SIGTERM and SIGINT
 
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
@@ -58,7 +58,9 @@ func run() error {
 		return nil
 	})
 	runy.AddF(func(ctx context.Context) error {
-		wait.UntilWithContext(ctx, func(ctx context.Context) { slog.Info("worker does useful things") }, 10*time.Second)
+		wait.UntilWithContext(ctx, func(ctx context.Context) {
+			slog.Info("worker does useful things")
+		}, 10*time.Second)
 		return nil
 	})
 
