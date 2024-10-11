@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"runy"
+
+	"github.com/belo4ya/runy"
 )
 
 func main() {

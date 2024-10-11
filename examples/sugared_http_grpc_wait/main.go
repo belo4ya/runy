@@ -7,8 +7,9 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"runy"
 	"time"
+
+	"github.com/belo4ya/runy"
 
 	"google.golang.org/grpc"
 	"k8s.io/apimachinery/pkg/util/wait"

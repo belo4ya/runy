@@ -1,4 +1,4 @@
-module runy
+module github.com/belo4ya/runy
 
 go 1.23.1
 
