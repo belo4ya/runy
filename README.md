@@ -7,17 +7,27 @@
 [![codecov](https://codecov.io/gh/belo4ya/runy/graph/badge.svg?token=GQZRP94G21)](https://codecov.io/gh/belo4ya/runy)
 [![license](https://img.shields.io/github/license/belo4ya/runy)](./LICENSE)
 
+🎯 The goal of the project is to provide developers with the opportunity not to think about the graceful shutdown
+and not to make mistakes in its implementation in their application.
+Instead, focus on startup components such as HTTP and gRPC servers and other `Runnable`s.
+
 ## 🚀 Install
 
 ```sh
 go get -u github.com/belo4ya/runy
 ```
 
-`runy` also supports semver releases.
+**Compatibility:** Go ≥ 1.20
 
-Note that `runy` only [supports](https://go.dev/doc/devel/release#policy) the two most recent minor versions of Go.
+## 🧠 Core Concepts
+
+Runnable, SugaredRunnable, Group...
 
 ## 💡 Usage
+
+- GoDoc: https://pkg.go.dev/github.com/belo4ya/runy
+- End-to-end usage examples: [examples/](examples)
+- Common `Runnable`s (http, grpc servers, kafka consumers): [examples/runnable](examples/runnables)
 
 You can import `runy` using:
 
@@ -37,7 +47,7 @@ func main() {
 }
 
 func run() error {
-	ctx := runy.SetupSignalHandler(context.Background()) // handle SIGTERM and SIGINT
+	ctx := runy.SetupSignalHandler(context.Background()) // handle SIGINT and SIGTERM
 
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
@@ -72,4 +82,11 @@ func run() error {
 }
 ```
 
-More examples in documentation.
+## 📚 Acknowledgments
+
+The following projects had a particular impact on the design of runy.
+
+- [kubernetes-sigs/controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) - set of go libraries for building Kubernetes controllers.
+- [oklog/run](https://github.com/oklog/run) - universal mechanism to manage goroutine lifecycles.
+- [go-kratos/kratos](https://github.com/go-kratos/kratos) - ultimate Go microservices framework for the cloud-native era.
+- [sourcegraph/conc](https://github.com/sourcegraph/conc) - better structured concurrency for Go.

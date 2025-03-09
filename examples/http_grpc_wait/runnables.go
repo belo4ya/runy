@@ -33,7 +33,7 @@ func (s *GRPCServer) Start(ctx context.Context) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		log.Println(fmt.Sprintf("GRPC server start listening on: %s", s.addr))
+		log.Printf("GRPC server start listening on: %s", s.addr)
 		if err := s.GRPC.Serve(lis); err != nil {
 			errCh <- fmt.Errorf("s.GRPC.Serve: %w", err)
 		}
@@ -63,7 +63,7 @@ func NewHTTPServer(addr string) *HTTPServer {
 func (s *HTTPServer) Start(ctx context.Context) error {
 	errCh := make(chan error, 1)
 	go func() {
-		log.Println(fmt.Sprintf("HTTP server start listening on: %s", s.HTTP.Addr))
+		log.Printf("HTTP server start listening on: %s", s.HTTP.Addr)
 		if err := s.HTTP.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			errCh <- fmt.Errorf("s.HTTP.ListenAndServe: %w", err)
 		}
