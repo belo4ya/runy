@@ -41,8 +41,8 @@ func run() error {
 }
 
 func initWithCleanup(i int) (any, func(), error) {
-	log.Println(fmt.Sprintf("init %d", i))
+	log.Printf("init %d", i)
 	return nil, func() {
-		log.Println(fmt.Sprintf("cleanup %d", i))
+		log.Printf("cleanup %d", i)
 	}, nil
 }

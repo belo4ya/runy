@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-// SetupSignalHandler registers for SIGTERM and SIGINT. A context is returned
+// SetupSignalHandler registers for SIGINT and SIGTERM. A context is returned
 // which is canceled on one of these signals. If a second signal is caught, the program
 // is terminated with exit code 1.
 func SetupSignalHandler(ctx context.Context) context.Context {

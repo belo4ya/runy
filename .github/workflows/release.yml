@@ -49,7 +49,7 @@ jobs:
           git config --global user.email "${{ github.triggering_actor}}@users.noreply.github.com"
 
           git add .
-          git commit --allow-empty -m 'bump ${{ inputs.tag }}'
+          git commit --allow-empty -m 'release ${{ inputs.tag }}'
           git tag ${{ inputs.tag }}
           git push origin ${{ inputs.tag }}
 
