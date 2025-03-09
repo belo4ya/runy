@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -15,7 +14,7 @@ func main() {
 }
 
 func run() error {
-	ctx := runy.SetupSignalHandler(context.Background()) // setup handler for SIGINT and SIGTERM
+	ctx := runy.SetupSignalHandler() // setup handler for SIGINT and SIGTERM
 
 	_, cleanup, err := initWithCleanup(1)
 	if err != nil {

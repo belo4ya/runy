@@ -47,7 +47,7 @@ func main() {
 }
 
 func run() error {
-	ctx := runy.SetupSignalHandler(context.Background()) // handle SIGINT and SIGTERM
+	ctx := runy.SetupSignalHandler() // handle SIGINT and SIGTERM
 
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
