@@ -1,7 +1,6 @@
 package runy
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,7 +12,7 @@ import (
 )
 
 func TestSetupSignalHandler(t *testing.T) {
-	ctx := SetupSignalHandler(context.Background())
+	ctx := SetupSignalHandler()
 	task := &Task{ticker: time.NewTicker(time.Second * 2)}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
