@@ -7,37 +7,37 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var g = NewGroup()
+var _g = NewGroup()
 
 // Add registers the provided Runnables to the default Group.
 // Returns the Group for method chaining.
 func Add(rns ...Runnable) Group {
-	return g.Add(rns...)
+	return _g.Add(rns...)
 }
 
 // AddF registers the provided RunnableFuncs to the default Group.
 // Returns the Group for method chaining.
 func AddF(rns ...RunnableFunc) Group {
-	return g.AddF(rns...)
+	return _g.AddF(rns...)
 }
 
 // SAdd registers a SugaredRunnable to the default Group.
 // The SugaredRunnable is converted to a standard Runnable using FromSugared.
 // Returns the Group for method chaining.
 func SAdd(rn SugaredRunnable, opts ...FromSugaredOption) Group {
-	return g.SAdd(rn, opts...)
+	return _g.SAdd(rn, opts...)
 }
 
 // SAddF registers a SugaredRunnable created from the provided start and stop functions to the default Group.
 // Returns the Group for method chaining.
 func SAddF(start StartFunc, stop StopFunc, opts ...FromSugaredOption) Group {
-	return g.SAddF(start, stop, opts...)
+	return _g.SAddF(start, stop, opts...)
 }
 
 // Start runs all registered Runnables in the default Group concurrently.
 // This function blocks until all Runnables complete or the context is canceled.
 func Start(ctx context.Context) (err error) {
-	return g.Start(ctx)
+	return _g.Start(ctx)
 }
 
 // Group manages a collection of Runnables that can be started together.
@@ -75,32 +75,32 @@ type group struct {
 	runnables []Runnable
 }
 
-func (m *group) Add(rns ...Runnable) Group {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.runnables = append(m.runnables, rns...)
-	return m
+func (g *group) Add(rns ...Runnable) Group {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.runnables = append(g.runnables, rns...)
+	return g
 }
 
-func (m *group) AddF(rns ...RunnableFunc) Group {
+func (g *group) AddF(rns ...RunnableFunc) Group {
 	for _, rn := range rns {
-		m.Add(rn)
+		g.Add(rn)
 	}
-	return m
+	return g
 }
 
-func (m *group) SAdd(rn SugaredRunnable, opts ...FromSugaredOption) Group {
-	return m.Add(FromSugared(rn, opts...))
+func (g *group) SAdd(rn SugaredRunnable, opts ...FromSugaredOption) Group {
+	return g.Add(FromSugared(rn, opts...))
 }
 
-func (m *group) SAddF(start StartFunc, stop StopFunc, opts ...FromSugaredOption) Group {
-	return m.Add(FromSugared(SugaredFromFuncs(start, stop), opts...))
+func (g *group) SAddF(start StartFunc, stop StopFunc, opts ...FromSugaredOption) Group {
+	return g.Add(FromSugared(SugaredFromFuncs(start, stop), opts...))
 }
 
-func (m *group) Start(ctx context.Context) (err error) {
-	m.once.Do(func() {
+func (g *group) Start(ctx context.Context) (err error) {
+	g.once.Do(func() {
 		eg, ctx := errgroup.WithContext(ctx)
-		for _, rn := range m.runnables {
+		for _, rn := range g.runnables {
 			rn := rn
 			eg.Go(func() error {
 				return rn.Start(ctx)

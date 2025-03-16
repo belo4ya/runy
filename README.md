@@ -8,7 +8,7 @@
 [![license](https://img.shields.io/github/license/belo4ya/runy)](./LICENSE)
 
 🎯 The goal of the project is to provide developers with the opportunity not to think about the graceful shutdown
-and not to make mistakes in its implementation in their application.
+and not to make mistakes in its implementation in their Go application.
 Instead, focus on startup components such as HTTP and gRPC servers and other `Runnable`s.
 
 ## 🚀 Install
@@ -19,72 +19,109 @@ go get -u github.com/belo4ya/runy
 
 **Compatibility:** Go ≥ 1.20
 
-## 🧠 Core Concepts
-
-Runnable, SugaredRunnable, Group...
-
 ## 💡 Usage
 
-- GoDoc: https://pkg.go.dev/github.com/belo4ya/runy
+- Tiny examples in godoc: [pkg.go.dev/github.com/belo4ya/runy#pkg-examples](https://pkg.go.dev/github.com/belo4ya/runy#pkg-examples)
 - End-to-end usage examples: [examples/](examples)
-- Common `Runnable`s (http, grpc servers, kafka consumers): [examples/runnable](examples/runnables)
+- `Runnable` recipes (http, grpc servers, kafka consumers): [examples/runnables](examples/runnables)
 
 You can import `runy` using:
 
 ```go
 import (
-    "github.com/belo4ya/runy"
+	"github.com/belo4ya/runy"
 )
 ```
 
-Then use one of the helpers below:
+Then implement the `Runnable` interface for your application components:
 
 ```go
-func main() {
-	if err := run(); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func run() error {
-	ctx := runy.SetupSignalHandler() // handle SIGINT and SIGTERM
-
-	lis, err := net.Listen("tcp", ":9090")
-	if err != nil {
-		return fmt.Errorf("net.Listen: %w", err)
-	}
-
-	httpSrv := &http.Server{Addr: ":8080"}
-	grpcSrv := grpc.NewServer()
-
-	// register all Runnable app components
-	runy.SAddF(func(ctx context.Context) error {
-		return runy.IgnoreHTTPServerClosed(httpSrv.ListenAndServe())
-	}, httpSrv.Shutdown)
-	runy.SAddF(func(ctx context.Context) error {
-		return grpcSrv.Serve(lis)
-	}, func(ctx context.Context) error {
-		grpcSrv.GracefulStop()
-		return nil
-	})
-	runy.AddF(func(ctx context.Context) error {
-		wait.UntilWithContext(ctx, func(ctx context.Context) {
-			slog.Info("worker does useful things")
-		}, 10*time.Second)
-		return nil
-	})
-
-	slog.InfoContext(ctx, "starting app")
-	if err := runy.Start(ctx); err != nil { // run app
-		return fmt.Errorf("problem with running app: %w", err)
-	}
-	return nil
+// Runnable allows a component to be started.
+// It's very important that Start blocks until it's done running.
+type Runnable interface {
+	// Start starts running the component.
+	// The component will stop running when the context is closed.
+	// Start blocks until the context is closed or an error occurs.
+	Start(ctx context.Context) error
 }
 ```
 
+Finally, register and run your components using `runy.Add` and `runy.Start`. 
+Here's a simple application with multiple HTTP servers:
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/belo4ya/runy"
+)
+
+func main() {
+	// Create a context that's canceled when SIGINT or SIGTERM is received.
+	ctx := runy.SetupSignalHandler()
+
+	// Initialize and register application components with runy.
+	httpSrv := NewHTTPServer(":8080") // main API server
+	mgmtSrv := NewHTTPServer(":8081") // /metrics, /debug/pprof, /healthz, /readyz
+	runy.Add(httpSrv, mgmtSrv)
+
+	// Start all components and block until shutdown.
+	log.Println("starting app")
+	if err := runy.Start(ctx); err != nil {
+		log.Fatalf("app error: %v", err)
+	}
+}
+
+type HTTPServer struct {
+	HTTP *http.Server
+}
+
+func NewHTTPServer(addr string) *HTTPServer {
+	return &HTTPServer{HTTP: &http.Server{Addr: addr}}
+}
+
+// Start implements Runnable interface.
+// It starts the HTTP server and blocks until context cancellation or server error.
+func (s *HTTPServer) Start(ctx context.Context) error {
+	errCh := make(chan error, 1)
+	go func() {
+		log.Printf("http server starts listening on: %s", s.HTTP.Addr)
+		if err := s.HTTP.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			errCh <- fmt.Errorf("http listen and serve: %w", err)
+		}
+		close(errCh)
+	}()
+
+	select {
+	case <-ctx.Done():
+		log.Println("shutting down http server")
+		// Handle cleanup after context cancellation with a reasonable shutdown timeout.
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		if err := s.HTTP.Shutdown(ctx); err != nil {
+			return fmt.Errorf("http shutdown: %w", err)
+		}
+		return nil
+	case err := <-errCh:
+		return err
+	}
+}
+```
+
+## 🧠 Core Concepts
+
+Runnable, SugaredRunnable, Group...
+
 ## 📚 Acknowledgments
 
-The following projects had a particular impact on the design of runy.
+The following projects had a particular impact on the design of `runy`.
 
 - [kubernetes-sigs/controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) - set of go libraries for building Kubernetes controllers.
 - [oklog/run](https://github.com/oklog/run) - universal mechanism to manage goroutine lifecycles.
