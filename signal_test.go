@@ -1,7 +1,6 @@
 package runy
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -23,8 +22,8 @@ func TestSetupSignalHandler(t *testing.T) {
 	}(c)
 
 	select {
-	case sig := <-c:
-		fmt.Printf("Got %s signal. Aborting...\n", sig)
+	case <-c:
+		return
 	case _, ok := <-ctx.Done():
 		assert.False(t, ok)
 	}
@@ -44,14 +43,11 @@ func (t *Task) Run(c chan os.Signal) {
 
 func handle() {
 	for i := 0; i < 5; i++ {
-		fmt.Print("#")
 		time.Sleep(time.Millisecond * 100)
 	}
-	fmt.Println()
 }
 
 func sendSignal(stopChan chan os.Signal) {
-	fmt.Printf("...")
 	time.Sleep(1 * time.Second)
 	stopChan <- os.Interrupt
 }

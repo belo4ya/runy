@@ -9,13 +9,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-type GRPCServerConfig struct {
-	Addr string
-}
-
 type GRPCServer struct {
 	GRPC *grpc.Server
 	conf GRPCServerConfig
+}
+
+type GRPCServerConfig struct {
+	Addr string
 }
 
 func NewGRPCServer(conf GRPCServerConfig) *GRPCServer {
@@ -30,7 +30,7 @@ func (s *GRPCServer) Start(ctx context.Context) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		log.Printf("grpc server start listening on: %s", s.conf.Addr)
+		log.Printf("grpc server starts listening on: %s", s.conf.Addr)
 		if err := s.GRPC.Serve(lis); err != nil {
 			errCh <- fmt.Errorf("grpc serve: %w", err)
 		}
